@@ -173,6 +173,16 @@
   .q-card.tbl{padding:16px 18px 18px; margin-bottom:14px;}
   .q-card.tbl .q-eq{font-size:34px;}
 
+  /* 숫자 키패드 */
+  .kp-display{text-align:center; font-size:40px; font-weight:900; color:var(--accent); background:var(--card); border-radius:20px; padding:8px 10px; margin-bottom:12px; min-height:62px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); letter-spacing:3px;}
+  .kp-display.empty{color:#d6cdf0;}
+  .kp-display.shake{animation:shake .4s;}
+  .keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .kp{border:none; cursor:pointer; border-radius:18px; padding:16px; font-size:25px; font-weight:900; background:var(--card); color:var(--ink); box-shadow:var(--shadow-sm); transition:transform .08s;}
+  .kp:active{transform:scale(.92);}
+  .kp-fn{background:#f0eafb; color:var(--soft);}
+  .kp-go{background:linear-gradient(135deg,#bdeccb,#9fd9b4); color:#2f7a52;}
+
   .confetti{position:fixed; top:-20px; font-size:20px; pointer-events:none; z-index:99; animation:fall linear forwards;}
   @keyframes fall{to{transform:translateY(110vh) rotate(540deg); opacity:.2;}}
 </style>
@@ -216,7 +226,8 @@
       <div class="q-visual" id="qVisual"></div>
       <div class="q-hint" id="qHint"></div>
     </div>
-    <div class="answers" id="answers"></div>
+    <div class="kp-display empty" id="qInput">?</div>
+    <div class="keypad" id="qKeypad"></div>
     <div class="feedback" id="feedback"></div>
   </section>
 
@@ -236,7 +247,8 @@
     <div id="tableQuiz">
       <div class="q-card tbl">
         <div class="q-eq" id="tEq"></div>
-        <div class="answers" id="tAns"></div>
+        <div class="kp-display empty" id="tInput">?</div>
+        <div class="keypad" id="tKeypad"></div>
         <div class="feedback" id="tFb"></div>
       </div>
     </div>
@@ -336,6 +348,31 @@ function openLearn(){
   }
 }
 
+/* ===== 숫자 키패드 입력 ===== */
+let typed={quiz:'',table:''}, tWrong=0;
+function keypadHTML(ctx){
+  let h='';
+  for(let k=1;k<=9;k++) h+=`<button class="kp" onclick="kpDigit('${ctx}',${k})">${k}</button>`;
+  h+=`<button class="kp kp-fn" onclick="kpDel('${ctx}')">⌫</button>`;
+  h+=`<button class="kp" onclick="kpDigit('${ctx}',0)">0</button>`;
+  h+=`<button class="kp kp-go" onclick="kpSubmit('${ctx}')">✓</button>`;
+  return h;
+}
+function inputEl(ctx){ return document.getElementById(ctx==='quiz'?'qInput':'tInput'); }
+function renderInput(ctx){ const el=inputEl(ctx); el.textContent= typed[ctx]||'?'; el.classList.toggle('empty', !typed[ctx]); }
+function kpDigit(ctx,d){ if(typed[ctx].length>=3) return; typed[ctx]+=String(d); renderInput(ctx); }
+function kpDel(ctx){ typed[ctx]=typed[ctx].slice(0,-1); renderInput(ctx); }
+function kpSubmit(ctx){ if(!typed[ctx]) return; const v=Number(typed[ctx]); if(ctx==='quiz') submitQuiz(v); else submitTable(v); }
+function shakeInput(ctx){ const el=inputEl(ctx); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+document.addEventListener('keydown',(e)=>{
+  const ctx = document.getElementById('quiz').classList.contains('active') ? 'quiz'
+            : document.getElementById('table').classList.contains('active') ? 'table' : null;
+  if(!ctx) return;
+  if(e.key>='0'&&e.key<='9') kpDigit(ctx,Number(e.key));
+  else if(e.key==='Backspace'){ e.preventDefault(); kpDel(ctx); }
+  else if(e.key==='Enter') kpSubmit(ctx);
+});
+
 /* 퀴즈 */
 let quiz={};
 function startQuiz(mode){
@@ -356,35 +393,25 @@ function nextQ(){
   document.getElementById('qVisual').innerHTML=gridDots(q.m, q.d, col, false);
   document.getElementById('qHint').textContent=`${q.d}씩 ${q.m}묶음이면 모두 몇 개일까요?`;
 
-  const opts=new Set([q.ans]);
-  while(opts.size<4){
-    let off=q.ans+(Math.floor(Math.random()*5)-2)*q.d;
-    if(off>0 && off!==q.ans) opts.add(off);
-    off=q.ans+(Math.floor(Math.random()*7)-3);
-    if(off>0 && off!==q.ans) opts.add(off);
-  }
-  const arr=[...opts].slice(0,4).sort(()=>Math.random()-.5);
-  const box=document.getElementById('answers'); box.innerHTML='';
-  arr.forEach(v=>{
-    const b=document.createElement('button'); b.className='ans-btn'; b.textContent=v;
-    b.onclick=()=>choose(b,v,q); box.appendChild(b);
-  });
+  quiz.wrong=0; typed.quiz=''; renderInput('quiz');
+  document.getElementById('qKeypad').innerHTML=keypadHTML('quiz');
   speak(`${q.d} 곱하기 ${q.m}은?`);
 }
-function choose(btn,val,q){
-  document.querySelectorAll('.ans-btn').forEach(b=>b.disabled=true);
-  const fb=document.getElementById('feedback');
-  if(val===q.ans){
-    btn.classList.add('correct'); quiz.correct++; state.score+=10;
+function submitQuiz(val){
+  const q=quiz.q[quiz.i], ans=q.ans, fb=document.getElementById('feedback');
+  if(val===ans){
+    quiz.correct++; state.score+=10; saveScore();
     fb.textContent=pick(['정답이야! 👍','멋지다! ⭐','완벽해! 🎯','대단해! 🌟']);
-    fb.style.color='#2f9e63'; saveScore();
-    setTimeout(()=>{quiz.i++; nextQ();},750);
+    fb.style.color='#2f9e63'; speak(`${q.d} 곱하기 ${q.m}은 ${ans}`);
+    typed.quiz=''; renderInput('quiz');
+    setTimeout(()=>{quiz.i++; nextQ();},800);
   }else{
-    btn.classList.add('wrong');
-    document.querySelectorAll('.ans-btn').forEach(b=>{ if(Number(b.textContent)===q.ans) b.classList.add('correct'); });
-    fb.innerHTML=`괜찮아! ${q.d} × ${q.m} = <b>${q.ans}</b> 이야 💪`;
-    fb.style.color='#e0964e'; speak(`${q.d} 곱하기 ${q.m}은 ${q.ans}`);
-    setTimeout(()=>{quiz.i++; nextQ();},1700);
+    quiz.wrong=(quiz.wrong||0)+1; shakeInput('quiz');
+    fb.textContent = quiz.wrong>=3 ? `${q.d}씩 뛰어 세어볼까요? 점을 세어봐요 🔢`
+                   : (val>ans ? '조금 더 작아요 ⬇️ 다시!' : '조금 더 커요 ⬆️ 다시!');
+    fb.style.color='#e0964e';
+    speak(val>ans?'조금 더 작아요':'조금 더 커요');
+    typed.quiz=''; renderInput('quiz');
   }
 }
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
@@ -475,35 +502,30 @@ function nextTableQuiz(){
 function showTableQuiz(show){
   document.getElementById('tableQuiz').style.display= show?'block':'none';
   if(!show) return;
-  const q=tTarget, ans=q.r*q.c;
+  const q=tTarget;
   document.getElementById('tEq').innerHTML=`${q.r} × ${q.c} = <span class="blank">?</span>`;
   document.getElementById('tFb').textContent='';
-  const opts=new Set([ans]);
-  while(opts.size<4){
-    let off=ans+(Math.floor(Math.random()*5)-2)*q.r; if(off>0&&off!==ans)opts.add(off);
-    off=ans+(Math.floor(Math.random()*7)-3); if(off>0&&off!==ans)opts.add(off);
-  }
-  const arr=[...opts].slice(0,4).sort(()=>Math.random()-.5);
-  const box=document.getElementById('tAns'); box.innerHTML='';
-  arr.forEach(v=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=v; b.onclick=()=>answerTable(b,v); box.appendChild(b); });
+  tWrong=0; typed.table=''; renderInput('table');
+  document.getElementById('tKeypad').innerHTML=keypadHTML('table');
   speak(`${q.r} 곱하기 ${q.c}은?`);
 }
-function answerTable(btn,val){
-  const q=tTarget, ans=q.r*q.c;
-  document.querySelectorAll('#tAns .ans-btn').forEach(b=>b.disabled=true);
-  const fb=document.getElementById('tFb');
+function submitTable(val){
+  const q=tTarget, ans=q.r*q.c, fb=document.getElementById('tFb');
   if(val===ans){
-    btn.classList.add('correct'); state.score+=10; saveScore();
+    state.score+=10; saveScore();
     tableSet.add(q.r+'_'+q.c); saveTable();
     fb.textContent=pick(['정답! 👍','잘했어! ⭐','멋져! 🎯']); fb.style.color='#2f9e63';
-    tTarget=null; renderTable(); updateTblProgress();
-    setTimeout(nextTableQuiz, 650);
-  }else{
-    btn.classList.add('wrong');
-    document.querySelectorAll('#tAns .ans-btn').forEach(b=>{ if(Number(b.textContent)===ans) b.classList.add('correct'); });
-    fb.innerHTML=`괜찮아! ${q.r} × ${q.c} = <b>${ans}</b> 💪`; fb.style.color='#e0964e';
     speak(`${q.r} 곱하기 ${q.c}은 ${ans}`);
-    setTimeout(()=>{ tableSet.add(q.r+'_'+q.c); saveTable(); tTarget=null; renderTable(); updateTblProgress(); nextTableQuiz(); }, 1700);
+    typed.table=''; renderInput('table');
+    tTarget=null; renderTable(); updateTblProgress();
+    setTimeout(nextTableQuiz, 700);
+  }else{
+    tWrong=(tWrong||0)+1; shakeInput('table');
+    fb.textContent = tWrong>=3 ? `${q.r}단을 떠올리며 천천히 다시! 🔢`
+                   : (val>ans ? '조금 더 작아요 ⬇️ 다시!' : '조금 더 커요 ⬆️ 다시!');
+    fb.style.color='#e0964e';
+    speak(val>ans?'조금 더 작아요':'조금 더 커요');
+    typed.table=''; renderInput('table');
   }
 }
 function togglePattern(p){
