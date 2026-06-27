@@ -1,5 +1,5 @@
 /* 구구단 나라 서비스워커 — 오프라인 캐시 */
-const CACHE = 'gugudan-v1';
+const CACHE = 'gugudan-v2';
 const ASSETS = [
   './',
   './index.html',
