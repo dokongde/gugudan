@@ -108,29 +108,23 @@ h1,h2,h3{margin:0; font-weight:700; letter-spacing:-.02em;}
 .node-wrap .mini-uni{position:absolute; width:66px; height:66px; left:calc(100% + 12px); top:0; animation:bob 3s infinite;}
 .node-wrap .mini-uni.left{left:auto; right:calc(100% + 12px);}
 
-/* 섬 풍경 */
+/* 섬 풍경: scenery.js 가 그린 한 장의 그림을 노드 뒤에 깐다 */
 .zone{position:relative; overflow:hidden; border-radius:34px; margin:20px -6px 0; padding:12px 12px 30px; background:var(--zbg);}
-.zone.z0{--zbg:linear-gradient(180deg,#e6f3e2 0%,#d9eed3 100%);}
-.zone.z1{--zbg:linear-gradient(180deg,#fff0e8 0%,#ffe4ec 100%);}
-.zone.z2{--zbg:linear-gradient(180deg,#e2f1fb 0%,#cfe6f7 100%);}
-.zone.z3{--zbg:linear-gradient(180deg,#30346f 0%,#22244f 100%);}
+.zone.z0{--zbg:#c2e2ae;}
+.zone.z1{--zbg:#ffdde8;}
+.zone.z2{--zbg:#acdaf4;}
+.zone.z3{--zbg:#2a2e63;}
 .zone .island{margin:0 0 8px; z-index:2;}
 .zone .path{position:relative; z-index:2;}
 .zone .deco{position:absolute; inset:0; z-index:0; pointer-events:none;}
-.zone .deco .d{position:absolute;} .zone .deco svg{width:100%; height:100%; display:block;}
-.zone .trail{position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; overflow:visible;}
-.zone .trail path{fill:none; stroke:rgba(255,255,255,.75); stroke-width:9; stroke-linecap:round; stroke-dasharray:1 17;}
-.zone .trail path.walked{stroke:rgba(255,255,255,.95); stroke-dasharray:none; stroke-width:7; opacity:.75;}
-.zone.z3 .trail path{stroke:rgba(255,255,255,.35);} .zone.z3 .trail path.walked{stroke:rgba(255,255,255,.55);}
-.zone .node.locked{background:#fff; color:#c8bfb0; box-shadow:0 7px 0 rgba(0,0,0,.08);}
-.zone.z3 .node.locked{background:#3f4485; color:#7b80c0; box-shadow:0 7px 0 #2a2d60;}
-.zone .node-name{color:#55615b; background:rgba(255,255,255,.7); padding:1px 8px; border-radius:8px;}
-.zone.z3 .node-name{color:#d9dbff; background:rgba(255,255,255,.08);}
-.zone .tlabel{border-color:transparent;}
+.zone .deco img{position:absolute; left:0; top:0; width:100%; height:100%; display:block;}
+.zone .node.locked{background:#fff; color:#c8bfb0; box-shadow:0 7px 0 rgba(0,0,0,.12);}
+.zone.z3 .node.locked{background:#3f4485; color:#8a8fd0; box-shadow:0 7px 0 #23265a;}
+.zone .node-name{color:#4b5752; background:rgba(255,255,255,.85); padding:1px 8px; border-radius:8px;}
+.zone.z3 .node-name{color:#e3e5ff; background:rgba(20,22,60,.55);}
+.zone .tlabel{border-color:transparent; box-shadow:0 3px 0 rgba(0,0,0,.08);}
 .zone.z3 .tlabel{background:#3f4485; color:#fff;}
 .zone .mini-uni{z-index:3;}
-.zone .tw{position:absolute; width:4px; height:4px; border-radius:50%; background:#fff; opacity:.6; animation:tw 2.4s ease-in-out infinite;}
-@keyframes tw{0%,100%{opacity:.25; transform:scale(.7)}50%{opacity:.9; transform:scale(1.2)}}
 
 /* ---------- 단 만나기 ---------- */
 .learn-head{display:flex; gap:12px; align-items:center;}

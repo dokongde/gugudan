@@ -442,7 +442,7 @@ function renderPath() {
       if (lastIsland >= 0) html += '</div></section>';
       lastIsland = n.island;
       const firstIdx = NODES.findIndex(x => x.island === n.island);
-      html += `<section class="zone z${n.island}" data-island="${n.island}"><div class="deco"></div><svg class="trail" preserveAspectRatio="none"></svg>
+      html += `<section class="zone z${n.island}" data-island="${n.island}"><div class="deco"></div>
         <div class="island ${nodeOpen(firstIdx) ? '' : 'locked'}" style="--c:${isl.color};--s:${isl.shade}">
         <span class="e">${ic(isl.icon)}</span><div><div class="isl-n">섬 ${n.island + 1}</div><h2>${isl.name}</h2><div class="t">${isl.tables.map(t => t + '단').join(' · ')}</div></div></div><div class="path">`;
     }
