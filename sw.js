@@ -1,7 +1,8 @@
-// 유니콘 구구단 서비스워커: 앱 파일은 최신 우선(백그라운드 갱신), 음성 파일은 캐시 우선
-const SHELL = 'unicorn-shell-v1';
+// 코알라 구구단 서비스워커: 앱 파일은 최신 우선(백그라운드 갱신), 음성 파일은 캐시 우선
+const SHELL = 'koala-shell-v2';
 const MEDIA = 'unicorn-media-v1';
-const FILES = ['./', 'index.html', 'app.css', 'app.js', 'manifest.json',
+const FILES = ['./', 'index.html', 'app.css', 'app.js', 'manifest.json', 'fonts/fredoka.css', 'fonts/pretendard.css',
+  'fonts/fredoka-latin-500-normal.woff2', 'fonts/fredoka-latin-600-normal.woff2', 'fonts/fredoka-latin-700-normal.woff2',
   'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'icon-180.png', 'favicon-32.png'];
 
 self.addEventListener('install', e => {
@@ -28,7 +29,7 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const isAudio = url.pathname.includes('/audio/');
+  const isAudio = url.pathname.includes('/audio/') || url.pathname.includes('/fonts/pretendard/');
   const isFont = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if (url.origin !== location.origin && !isFont) return;
 

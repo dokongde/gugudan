@@ -3,27 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#c9b2f7">
+<meta name="theme-color" content="#fbf7f0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>유니콘 구구단</title>
+<title>코알라 구구단</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fredoka.css">
+<link rel="stylesheet" href="fonts/pretendard.css">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <div id="app">
   <main id="screen"></main>
   <nav id="nav">
-    <button data-go="path"><span>🗺️</span>모험</button>
-    <button data-go="map"><span>🧩</span>지도</button>
-    <button data-go="bolt"><span>⚡</span>번개</button>
-    <button data-go="book"><span>📒</span>스티커</button>
-    <button data-go="settings"><span>⚙️</span>설정</button>
+    <button data-go="path" data-ic="path">모험</button>
+    <button data-go="map" data-ic="grid">지도</button>
+    <button data-go="bolt" data-ic="bolt">번개</button>
+    <button data-go="book" data-ic="star">스티커</button>
+    <button data-go="settings" data-ic="sliders">설정</button>
   </nav>
 </div>
 <div id="sheet" class="sheet hidden"></div>
