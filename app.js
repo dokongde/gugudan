@@ -436,13 +436,14 @@ function renderPath() {
   }
   let lastIsland = -1, lastTable = -1, k = 0;
   const zig = [0, 56, 84, 56, 0, -56, -84, -56];
-  html += '<div class="path">';
   NODES.forEach((n, i) => {
     const isl = ISLANDS[n.island];
     if (n.island !== lastIsland) {
+      if (lastIsland >= 0) html += '</div></section>';
       lastIsland = n.island;
       const firstIdx = NODES.findIndex(x => x.island === n.island);
-      html += `</div><div class="island ${nodeOpen(firstIdx) ? '' : 'locked'}" style="--c:${isl.color};--s:${isl.shade}">
+      html += `<section class="zone z${n.island}" data-island="${n.island}"><div class="deco"></div><svg class="trail" preserveAspectRatio="none"></svg>
+        <div class="island ${nodeOpen(firstIdx) ? '' : 'locked'}" style="--c:${isl.color};--s:${isl.shade}">
         <span class="e">${ic(isl.icon)}</span><div><div class="isl-n">섬 ${n.island + 1}</div><h2>${isl.name}</h2><div class="t">${isl.tables.map(t => t + '단').join(' · ')}</div></div></div><div class="path">`;
     }
     if (n.table !== lastTable && n.type !== 'final') { lastTable = n.table; html += `<div class="tlabel" style="--c:${isl.color}">${n.table}단</div>`; }
@@ -450,13 +451,13 @@ function renderPath() {
     const open = nodeOpen(i), done = !!S.done[n.id], isCur = i === ci;
     const info = NODE_INFO[n.type];
     const cls = ['node', n.type === 'boss' || n.type === 'final' ? 'boss' : '', done ? 'done' : '', open ? '' : 'locked', isCur ? 'current' : ''].join(' ');
-    const dx = zig[k++ % zig.length];
+    const dx = Math.round(zig[k++ % zig.length] * (window.innerWidth < 520 ? 0.55 : 1));
     html += `<div class="node-wrap" style="transform:translateX(${dx}px)">
       <button class="${cls}" style="--c:${isl.color};--s:${isl.shade}" data-i="${i}">${ic(open ? info.icon : 'lock')}${done ? `<span class="badge">${ic('check')}</span>` : ''}</button>
       <span class="node-name">${info.name}</span>
       ${isCur ? `<div class="mini-uni ${dx > 0 ? 'left' : ''}">${koala()}</div>` : ''}</div>`;
   });
-  html += '</div><div style="height:30px"></div>';
+  html += '</div></section><div style="height:30px"></div>';
   screen.innerHTML = html;
   screen.querySelectorAll('.node').forEach(b => b.onclick = () => {
     const i = +b.dataset.i;
@@ -464,6 +465,8 @@ function renderPath() {
     SFX.tap(); openNode(NODES[i]);
   });
   const rb = $('#reviewBtn'); if (rb) rb.onclick = () => startReview();
+  requestAnimationFrame(decorateZones);
+  if (document.fonts) document.fonts.ready.then(() => { if (cur === 'path') decorateZones(); });
   const curNode = screen.querySelector('.node.current');
   if (curNode && ci > 2) setTimeout(() => curNode.scrollIntoView({ block: 'center', behavior: 'smooth' }), 80);
   $('#helloUni').onclick = () => { Voice.phrase('hello'); const m = $('#helloUni'); m.classList.remove('jump'); void m.offsetWidth; m.classList.add('jump'); };
