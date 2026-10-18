@@ -258,7 +258,7 @@ h1,h2,h3{margin:0; font-weight:700; letter-spacing:-.02em;}
 
 /* ---------- 지도 ---------- */
 .mapwrap{overflow-x:auto; padding-bottom:4px;}
-.grid{display:grid; grid-template-columns:repeat(13,minmax(24px,1fr)); gap:3px; min-width:330px;}
+.grid{display:grid; grid-template-columns:repeat(12,minmax(24px,1fr)); gap:3px; min-width:330px;}
 .grid .h{font-size:14px; font-weight:700; color:var(--faint); display:flex; align-items:center; justify-content:center; aspect-ratio:1;}
 .grid .c{aspect-ratio:1; border-radius:8px; font-size:clamp(10px,2.1vw,17px); font-weight:600; display:flex; align-items:center; justify-content:center;
   background:var(--st-new); color:#c3b9a8; position:relative;}

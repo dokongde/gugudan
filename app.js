@@ -3,7 +3,7 @@
 
 // ================= 데이터 =================
 const ISLANDS = [
-  { name: '숲속 섬', icon: 'leaf', tables: [1, 2, 10, 5], color: '#2fa77a', shade: '#23845f', soft: '#e3f3ea',
+  { name: '숲속 섬', icon: 'leaf', tables: [2, 10, 5], color: '#2fa77a', shade: '#23845f', soft: '#e3f3ea',
     stickers: ['🐶', '🐱', '🐰', '🦊', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'] },
   { name: '사탕 섬', icon: 'candy', tables: [4, 3, 6], color: '#ff7a59', shade: '#dc5a3b', soft: '#ffece4',
     stickers: ['🍩', '🍪', '🧁', '🍰', '🍭', '🍬', '🍫', '🍦', '🍓', '🍉', '🍒', '🍑'] },
@@ -67,7 +67,9 @@ function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch 
 // ================= 문제(사실) 상태 / 간격 반복 =================
 const key = (a, b) => `${a}x${b}`;
 const ALL = [];
-for (let a = 1; a <= 12; a++) for (let b = 1; b <= 12; b++) ALL.push([a, b]);
+// 1단(×1)은 1학년 내용이라 빼고 2~12만
+for (let a = 2; a <= 12; a++) for (let b = 2; b <= 12; b++) ALL.push([a, b]);
+const N_ALL = ALL.length, N_UNIQ = (N_ALL + 11) / 2;
 const MIN = 60e3, HOUR = 3600e3, DAY = 864e5;
 const INTERVAL = [0, 5 * MIN, 20 * HOUR, 2 * DAY, 4 * DAY, 8 * DAY];
 
@@ -448,7 +450,7 @@ function renderPath() {
   const got = d.g.length + d.b.length;
   const nextChest = CHEST_AT[d.ch];
   const due = dueFacts().length, learned = learnedFacts().length;
-  const greet = ci === 0 ? (calc ? `연산 나라에 온 걸 환영해! 덧셈부터 차근차근 해 보자.` : `안녕 지안! 나는 코알라 ${uniName()}야. 같이 구구단 섬을 모험하자!`)
+  const greet = ci === 0 ? (calc ? `연산 나라에 온 걸 환영해! 몇십 더하기부터 차근차근 해 보자.` : `안녕 지안! 나는 코알라 ${uniName()}야. 같이 구구단 섬을 모험하자!`)
     : got ? `오늘 벌써 ${got}개나 외웠어!` : '오늘도 같이 해볼까?';
   let html = `
   <div class="hello"><div class="mascot" id="helloUni">${koala('happy')}</div><div class="bubble">${greet}</div></div>
@@ -510,14 +512,14 @@ function renderPath() {
 }
 
 // ================= 레슨 설정 =================
-const tableFacts = (t, from = 1, to = 12) => { const r = []; for (let k = from; k <= to; k++) r.push([t, k]); return r; };
+const tableFacts = (t, from = 2, to = 12) => { const r = []; for (let k = from; k <= to; k++) r.push([t, k]); return r; };
 const both = facts => { const seen = new Set(), r = []; facts.forEach(([a, b]) => [[a, b], [b, a]].forEach(f => { const k = key(...f); if (!seen.has(k)) { seen.add(k); r.push(f); } })); return r; };
 
 function openNode(n) {
   if (n.world === 'calc') return openCalcNode(n);
   const t = n.table, isl = n.island;
   if (n.type === 'learn') return renderLearnIntro(n);
-  if (n.type === 'pA') return startLesson({ node: n, island: isl, pool: tableFacts(t, 1, 6), target: 8, mix: { choice: 0.4, missing: 0.15 } });
+  if (n.type === 'pA') return startLesson({ node: n, island: isl, pool: tableFacts(t, 2, 6), target: 8, mix: { choice: 0.4, missing: 0.15 } });
   if (n.type === 'pB') return startLesson({ node: n, island: isl, pool: tableFacts(t, 7, 12), target: 8, mix: { choice: 0.4, missing: 0.15 } });
   if (n.type === 'mix') {
     const review = learnedFacts().filter(([a, b]) => a !== t && b !== t);
@@ -538,8 +540,8 @@ function islandNow() { const n = NODES[Math.min(currentIndex(NODES), NODES.lengt
 function openCalcNode(n) {
   const page = ISLANDS.length + n.island, base = { node: n, island: n.island, page, calc: true };
   if (n.type === 'learn') return renderCalcIntro(n);
-  if (n.type === 'prac') return startLesson({ ...base, gen: () => makeQ(n.skill), target: 10, mix: { choice: 0.25, missing: n.skill === 'a1' ? 0 : 0.15 } });
-  if (n.type === 'boss') return startLesson({ ...base, gen: () => makeQ(n.skill), target: 10, boss: true, mix: { choice: 0.1, missing: n.skill === 'a1' ? 0 : 0.15 } });
+  if (n.type === 'prac') return startLesson({ ...base, gen: () => makeQ(n.skill), target: 10, mix: { choice: 0.25, missing: 0.15 } });
+  if (n.type === 'boss') return startLesson({ ...base, gen: () => makeQ(n.skill), target: 10, boss: true, mix: { choice: 0.1, missing: 0.15 } });
   if (n.type === 'final') return startLesson({ ...base, gen: () => makeQ(pick(CALC_FINAL)), target: 20, boss: true, mix: { choice: 0, missing: 0.15 } });
 }
 function startCalcReview() {
@@ -603,7 +605,7 @@ function renderLearnIntro(n) {
   $('#playAll').onclick = async () => {
     if (playing) { playing = false; Voice.stop(); mark(0); return; }
     playing = true; $('#playAll').innerHTML = `${ic('pause')} 멈추기`;
-    for (let b = 1; b <= 12 && playing && cur === 'learnIntro'; b++) {
+    for (let b = 2; b <= 12 && playing && cur === 'learnIntro'; b++) {
       mark(b);
       screen.querySelector(`.trow[data-b="${b}"]`).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       if (S.settings.sound) await Voice.fact(t, b); else await new Promise(r => setTimeout(r, 900));
@@ -612,7 +614,7 @@ function renderLearnIntro(n) {
     playing = false; mark(0); const pb = $('#playAll'); if (pb) pb.innerHTML = `${ic('play')} 모두 듣기`;
   };
   // 만나기 레슨: 1부터 12까지 순서대로, 고르기 문제
-  $('#startBtn').onclick = () => { playing = false; startLesson({ node: n, island: n.island, pool: tableFacts(t), target: 12, ordered: true, mix: { choice: 1, missing: 0 } }); };
+  $('#startBtn').onclick = () => { playing = false; startLesson({ node: n, island: n.island, pool: tableFacts(t), target: 11, ordered: true, mix: { choice: 1, missing: 0 } }); };
 }
 
 // ================= 레슨 엔진 =================
@@ -962,22 +964,22 @@ function renderMap() {
   const counts = { new: 0, learn: 0, green: 0, bolt: 0 };
   ALL.forEach(([a, b]) => counts[status(a, b)]++);
   let cells = '<div class="h">×</div>';
-  for (let b = 1; b <= 12; b++) cells += `<div class="h">${b}</div>`;
-  for (let a = 1; a <= 12; a++) {
+  for (let b = 2; b <= 12; b++) cells += `<div class="h">${b}</div>`;
+  for (let a = 2; a <= 12; a++) {
     cells += `<div class="h">${a}</div>`;
-    for (let b = 1; b <= 12; b++) {
+    for (let b = 2; b <= 12; b++) {
       const st = status(a, b);
       const cls = ['c', st, a > b ? 'lower' : '', a === b ? 'diag' : '', mapSel && mapSel[0] === a && mapSel[1] === b ? 'sel' : '',
         mapSel && mapSel[0] === b && mapSel[1] === a && a !== b ? 'mir' : ''].join(' ');
       cells += `<button class="${cls}" data-a="${a}" data-b="${b}">${a * b}</button>`;
     }
   }
-  const pct = n => (n / 144 * 100) + '%';
+  const pct = n => (n / N_ALL * 100) + '%';
   screen.innerHTML = `
     <h2 class="title">구구단 지도</h2>${worldToggle()}
     <div class="card" style="margin-bottom:14px">
       <div class="row" style="justify-content:space-between;font-size:20px;margin-bottom:8px">
-        <span>외운 문제 <b>${counts.green + counts.bolt}</b> / 144</span><span class="boltc">${ic('bolt', 'sm')} ${counts.bolt}</span></div>
+        <span>외운 문제 <b>${counts.green + counts.bolt}</b> / ${N_ALL}</span><span class="boltc">${ic('bolt', 'sm')} ${counts.bolt}</span></div>
       <div class="progress-big"><i style="width:${pct(counts.bolt)};background:var(--st-bolt)"></i><i style="width:${pct(counts.green)};background:var(--st-green)"></i><i style="width:${pct(counts.learn)};background:var(--st-learn)"></i></div>
       <div class="legend">
         <span><i style="background:var(--st-new)"></i>아직 (${counts.new})</span>
@@ -988,7 +990,7 @@ function renderMap() {
     <div class="mapwrap"><div class="grid ${mapMirror ? 'mirror' : ''}" id="grid">${cells}</div></div>
     <div class="row" style="margin-top:14px;flex-wrap:wrap">
       <button class="btn ${mapMirror ? '' : 'ghost'}" id="mirBtn">${ic('mirror')} 짝꿍 찾기</button></div>
-    ${mapMirror ? `<div class="tip">${ic('mirror')}<span>${MIRROR_TIP}<br>대각선을 기준으로 거울처럼 같아서, 144개 중에 정말 다른 문제는 <b>78개</b>뿐이에요!</span></div>` : ''}
+    ${mapMirror ? `<div class="tip">${ic('mirror')}<span>${MIRROR_TIP}<br>대각선을 기준으로 거울처럼 같아서, ${N_ALL}개 중에 정말 다른 문제는 <b>${N_UNIQ}개</b>뿐이에요!</span></div>` : ''}
     <div class="note" style="margin-top:10px">칸을 누르면 들을 수 있어요. 노란 번개 칸은 3초 안에 바로 맞힌 문제예요.</div>`;
   screen.querySelectorAll('.grid .c').forEach(c => c.onclick = () => {
     const a = +c.dataset.a, b = +c.dataset.b; mapSel = [a, b];

@@ -8,10 +8,10 @@ const OPSYM = { x: '×', '+': '+', '-': '−', '÷': '÷' };
 
 // ---------- 섬 ----------
 const CALC_ISLANDS = [
-  { name: '덧셈 섬', icon: 'plus', theme: 0, color: '#2fa77a', shade: '#23845f', soft: '#e3f3ea', sub: '10 만들기 · 받아올림',
-    skills: ['a1', 'a2', 'a3', 'a4', 'a5'], stickers: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍇', '🍏', '🥥', '🍈', '🥭', '🥝', '🍍'] },
-  { name: '뺄셈 섬', icon: 'minus', theme: 1, color: '#ff7a59', shade: '#dc5a3b', soft: '#ffece4', sub: '20까지 · 받아내림',
-    skills: ['s1', 's2', 's3', 's4'], stickers: ['🚗', '🚕', '🚌', '🏎️', '🚓', '🚑', '🚒', '🚜', '🚲', '🛴', '🚂', '🚁'] },
+  { name: '덧셈 섬', icon: 'plus', theme: 0, color: '#2fa77a', shade: '#23845f', soft: '#e3f3ea', sub: '몇십 · 받아올림',
+    skills: ['a3', 'a4', 'a5'], stickers: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍇', '🍏', '🥥', '🍈', '🥭', '🥝', '🍍'] },
+  { name: '뺄셈 섬', icon: 'minus', theme: 1, color: '#ff7a59', shade: '#dc5a3b', soft: '#ffece4', sub: '몇십 · 받아내림',
+    skills: ['s2', 's3', 's4'], stickers: ['🚗', '🚕', '🚌', '🏎️', '🚓', '🚑', '🚒', '🚜', '🚲', '🛴', '🚂', '🚁'] },
   { name: '나눗셈 섬', icon: 'divide', theme: 2, color: '#3d9be0', shade: '#2a7cbd', soft: '#e3f0fb', sub: '구구단 거꾸로',
     skills: ['d1', 'd2', 'd3', 'd4'], stickers: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🎱', '🎯', '🎨', '🧩', '🎳', '🎲'] },
   { name: '무지개 섬', icon: 'mix', theme: 3, color: '#6c63e0', shade: '#5048bf', soft: '#ebe9fb', sub: '섞어 풀기 · 빈칸',
@@ -22,12 +22,6 @@ const CALC_ISLANDS = [
 // gen(): { op, a, b, miss? }  (miss: 'a' | 'b' | 'c' — 비어 있는 자리, 기본은 답 c)
 // ex: 만나기 화면의 예시 [op, a, b, 풀이]
 const SKILLS = {
-  a1: { name: '10 만들기', op: '+', fast: 4000, tip: '더해서 10이 되는 짝꿍을 외워 두면 덧셈이 아주 쉬워져요.',
-    ex: [['+', 1, 9, ''], ['+', 2, 8, ''], ['+', 3, 7, ''], ['+', 4, 6, ''], ['+', 5, 5, '']],
-    gen: () => { const a = ri(1, 9); return { op: '+', a, b: 10 - a, miss: Math.random() < 0.65 ? 'b' : 'c' }; } },
-  a2: { name: '20까지 덧셈', op: '+', fast: 4000, tip: '10을 먼저 만들고, 남은 수를 더해요.',
-    ex: [['+', 8, 5, '8 + 2 + 3 = 10 + 3 = 13'], ['+', 7, 6, '7 + 3 + 3 = 10 + 3 = 16'], ['+', 9, 4, '9 + 1 + 3 = 10 + 3 = 13']],
-    gen: () => { let a, b; do { a = ri(2, 9); b = ri(2, 9); } while (a + b <= 10 && Math.random() < 0.85); return { op: '+', a, b }; } },
   a3: { name: '몇십 더하기', op: '+', fast: 5000, tip: '몇십을 더할 때는 십의 자리만 더하면 돼요.',
     ex: [['+', 30, 40, '3 + 4 = 7 → 70'], ['+', 45, 30, '40 + 30 = 70, 70 + 5 = 75'], ['+', 62, 20, '60 + 20 = 80, 80 + 2 = 82']],
     gen: () => {
@@ -47,9 +41,6 @@ const SKILLS = {
       const ao = ri(2, 9), bo = ri(10 - ao, 9), at = ri(1, 7), bt = ri(0, 8 - at);
       return { op: '+', a: at * 10 + ao, b: bt * 10 + bo };
     } },
-  s1: { name: '20까지 뺄셈', op: '-', fast: 4000, tip: '10까지 먼저 빼고, 남은 수를 더 빼요.',
-    ex: [['-', 13, 5, '13 − 3 − 2 = 10 − 2 = 8'], ['-', 15, 7, '15 − 5 − 2 = 10 − 2 = 8'], ['-', 12, 4, '12 − 2 − 2 = 10 − 2 = 8']],
-    gen: () => { const a = ri(11, 18); return { op: '-', a, b: ri(Math.max(2, (a % 10) + 1), 9) }; } },
   s2: { name: '몇십 빼기', op: '-', fast: 5000, tip: '몇십을 뺄 때는 십의 자리만 빼면 돼요.',
     ex: [['-', 70, 30, '7 − 3 = 4 → 40'], ['-', 56, 20, '50 − 20 = 30, 30 + 6 = 36'], ['-', 84, 50, '80 − 50 = 30, 30 + 4 = 34']],
     gen: () => {
@@ -84,16 +75,16 @@ const SKILLS = {
     gen: () => divGen([2, 3, 4, 5, 6, 7, 8, 9, 10]) },
   m1: { name: '덧셈 뺄셈 섞기', op: '+', fast: 8000, tip: '+ 인지 − 인지 먼저 잘 보고 풀어요.',
     ex: [['+', 46, 27, '46 + 20 = 66, 66 + 7 = 73'], ['-', 63, 28, '63 − 20 = 43, 43 − 8 = 35']],
-    gen: () => SKILLS[pick(['a2', 'a4', 'a5', 's1', 's3', 's4'])].gen() },
+    gen: () => SKILLS[pick(['a3', 'a4', 'a5', 's2', 's3', 's4'])].gen() },
   m2: { name: '빈칸 채우기', op: '+', fast: 9000, tip: '빈칸은 거꾸로 계산해요. ? + 17 = 45 → 45 − 17 = 28',
     ex: [['+', 28, 17, '? + 17 = 45 → 45 − 17 = 28', 'a'], ['-', 63, 25, '63 − ? = 38 → 63 − 38 = 25', 'b'], ['÷', 28, 4, '? ÷ 4 = 7 → 7 × 4 = 28', 'a']],
-    gen: () => Object.assign(SKILLS[pick(['a2', 'a4', 'a5', 's1', 's3', 's4', 'd4'])].gen(), { miss: Math.random() < 0.5 ? 'a' : 'b' }) },
+    gen: () => Object.assign(SKILLS[pick(['a4', 'a5', 's3', 's4', 'd4'])].gen(), { miss: Math.random() < 0.5 ? 'a' : 'b' }) },
   m3: { name: '곱셈 나눗셈 섞기', op: 'x', fast: 4500, tip: '× 와 ÷ 는 짝꿍! 6 × 7 = 42 이면 42 ÷ 7 = 6 이에요.',
     ex: [['x', 6, 7, '6 × 7 = 42'], ['÷', 42, 7, '7 × 6 = 42 → 6']],
     gen: () => (Math.random() < 0.5 ? { op: 'x', a: ri(2, 10), b: ri(2, 10) } : divGen([2, 3, 4, 5, 6, 7, 8, 9, 10])) },
   m4: { name: '모두 섞기', op: '+', fast: 8000, tip: '지금까지 배운 걸 모두 섞었어요. 천천히, 차근차근!',
     ex: [['+', 57, 36, '57 + 30 = 87, 87 + 6 = 93'], ['-', 81, 45, '81 − 40 = 41, 41 − 5 = 36'], ['÷', 72, 8, '8 × 9 = 72 → 9']],
-    gen: () => SKILLS[pick(['a2', 'a3', 'a5', 's1', 's2', 's4', 'd4', 'm3'])].gen() },
+    gen: () => SKILLS[pick(['a3', 'a4', 'a5', 's2', 's3', 's4', 'd4', 'm3'])].gen() },
 };
 function divGen(divs) { const b = pick(divs), q = ri(1, 10); return { op: '÷', a: b * q, b }; }
 // 기술의 문제 하나 (어느 기술로 기록할지 sk에 담는다)
@@ -104,7 +95,7 @@ const CALC_NODES = [];
 CALC_ISLANDS.forEach((isl, ii) => isl.skills.forEach(sk =>
   ['learn', 'prac', 'boss'].forEach(type => CALC_NODES.push({ id: `c-${sk}-${type}`, type, skill: sk, island: ii, world: 'calc' }))));
 CALC_NODES.push({ id: 'c-final', type: 'final', skill: null, island: 3, world: 'calc' });
-const CALC_FINAL = ['a2', 'a4', 'a5', 's1', 's3', 's4', 'd4', 'm2', 'm3'];
+const CALC_FINAL = ['a4', 'a5', 's3', 's4', 'd4', 'm2', 'm3'];
 
 // ---------- 계산 ----------
 function resultOf(q) {
