@@ -163,12 +163,12 @@ const THEMES = [
 
 // ---------- 배치 ----------
 function decorateZone(zone) {
-  const ii = +zone.dataset.island, T = THEMES[ii];
+  const ii = +zone.dataset.theme, T = THEMES[ii];
   const deco = zone.querySelector('.deco');
   const W = zone.clientWidth, H = zone.clientHeight;
   if (!W || !H) return;
   const zr = zone.getBoundingClientRect();
-  const rnd = seeded(ii * 7919 + 13);
+  const rnd = seeded(+(zone.dataset.seed || ii) * 7919 + 13);
   const R = T.road.w;
 
   // 길: 노드 중심을 지나는 곡선
