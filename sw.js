@@ -1,5 +1,5 @@
 // 코알라 구구단 서비스워커: 앱 파일은 최신 우선(백그라운드 갱신), 음성 파일은 캐시 우선
-const SHELL = 'koala-shell-v5';
+const SHELL = 'koala-shell-v6';
 const MEDIA = 'unicorn-media-v1';
 const FILES = ['./', 'index.html', 'app.css', 'app.js', 'scenery.js', 'calc.js', 'manifest.json', 'fonts/fredoka.css', 'fonts/pretendard.css',
   'fonts/fredoka-latin-500-normal.woff2', 'fonts/fredoka-latin-600-normal.woff2', 'fonts/fredoka-latin-700-normal.woff2',
