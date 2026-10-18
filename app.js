@@ -49,6 +49,7 @@ const PHRASES = {
 const GOOD_KEYS = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6'];
 
 // ================= 저장 =================
+const APP_VERSION = '2026.10.18-2';
 const STORE = 'unicorn-gugudan-v1'; // 기존 기록 유지를 위해 키는 그대로
 const DEFAULT_SETTINGS = { voice: 'ko', sound: true, sfx: true, deSub: true, name: '코코', unlockAll: false };
 let S = load();
@@ -1076,6 +1077,7 @@ function renderSettings() {
     <div class="card set"><label>부모님용</label>${seg('unlockAll', [[false, '순서대로 열기'], [true, '모든 단계 열기']])}
       <button class="btn ghost" id="resetBtn">기록 모두 지우기</button>
       <div class="note">기록은 이 기기(브라우저)에만 저장돼요.</div></div>
+    <div class="note center">앱 버전 ${APP_VERSION}</div>
   </div><div style="height:20px"></div>`;
   screen.querySelectorAll('.seg').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
     const v = b.dataset.v; st[g.dataset.k] = v === 'true' ? true : v === 'false' ? false : v;
@@ -1095,7 +1097,14 @@ history.replaceState({ s: 'path' }, '');
 go('path', false);
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(reg => {
+  // 새 버전 서비스워커가 자리를 잡으면 한 번 새로고침해서 바로 새 화면으로
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded || cur === 'lesson') return;
+    reloaded = true; location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => { reg.update(); return navigator.serviceWorker.ready; }).then(reg => {
     // 오프라인용으로 음성 파일을 한 번 받아 둔다
     if (localStorage.getItem('audio-cached') === '1' || !reg.active) return;
     const files = [];

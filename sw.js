@@ -1,12 +1,13 @@
-// 코알라 구구단 서비스워커: 앱 파일은 최신 우선(백그라운드 갱신), 음성 파일은 캐시 우선
-const SHELL = 'koala-shell-v6';
+// 코알라 구구단 서비스워커: 앱 파일은 인터넷 우선(없으면 저장본), 음성·글꼴은 저장본 우선
+const SHELL = 'koala-shell-v7';
 const MEDIA = 'unicorn-media-v1';
 const FILES = ['./', 'index.html', 'app.css', 'app.js', 'scenery.js', 'calc.js', 'manifest.json', 'fonts/fredoka.css', 'fonts/pretendard.css',
   'fonts/fredoka-latin-500-normal.woff2', 'fonts/fredoka-latin-600-normal.woff2', 'fonts/fredoka-latin-700-normal.woff2',
   'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'icon-180.png', 'favicon-32.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // 브라우저 HTTP 캐시(깃허브 페이지 10분)를 건너뛰고 서버에서 새로 받아 저장
+  e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
@@ -43,11 +44,15 @@ self.addEventListener('fetch', e => {
     }));
     return;
   }
-  // 앱 파일: 캐시를 바로 주고, 뒤에서 새 버전으로 갱신
+  // 앱 파일: 인터넷이 되면 항상 서버에서 최신(바뀐 게 없으면 304로 가볍게), 안 되면 저장본
   e.respondWith(caches.open(SHELL).then(async c => {
     const key = req.mode === 'navigate' ? 'index.html' : req;
-    const hit = await c.match(key, { ignoreSearch: true });
-    const net = fetch(req).then(r => { if (r.ok) c.put(key, r.clone()); return r; }).catch(() => hit);
-    return hit || net;
+    try {
+      const r = await fetch(req, { cache: 'no-cache' });
+      if (r.ok) c.put(key, r.clone());
+      return r;
+    } catch (err) {
+      return (await c.match(key, { ignoreSearch: true })) || Response.error();
+    }
   }));
 });
